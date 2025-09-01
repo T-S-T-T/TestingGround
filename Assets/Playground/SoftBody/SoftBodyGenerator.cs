@@ -115,8 +115,8 @@ public class SoftBodyGenerator : MonoBehaviour
                 sj.connectedBody = nodes[bestJ];
                 sj.spring = spring;
                 sj.damper = damper;
-                sj.minDistance = minDist * 0.9f;
-                sj.maxDistance = minDist * 1.1f;
+                //sj.minDistance = minDist * 0.9f;
+                //sj.maxDistance = minDist * 1.1f;
 
                 // mark pair so we never double-connect
                 connectedPair.Add((Math.Min(i, bestJ), Math.Max(i, bestJ)));
