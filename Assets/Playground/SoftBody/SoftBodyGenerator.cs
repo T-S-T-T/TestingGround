@@ -84,8 +84,8 @@ public class SoftBodyGenerator : MonoBehaviour
                 sj.connectedBody = nodes[closest];
                 sj.spring = spring;
                 sj.damper = damper;
-                sj.minDistance = minDist * 0.9f;
-                sj.maxDistance = minDist * 1.1f;
+                //sj.minDistance = minDist * 0.9f;
+                //sj.maxDistance = minDist * 1.1f;
 
                 connected[i] = true;
                 connected[closest] = true;
