@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,11 +6,13 @@ using UnityEngine;
 public class SoftBodyGenerator : MonoBehaviour
 {
     [Header("Soft-Body Settings")]
-    public int nodeCount = 100;
-    public float radius = 0.5f;
-    public float nodeMass = 0.1f;
-    public float spring = 200f;
-    public float damper = 5f;
+    private readonly int nodeCount = 200;
+    private readonly float radius = 1f;
+    private readonly float nodeMass = 0.1f;
+    private readonly float spring = 100f;
+    private readonly float springSurface = 1000f;
+    private readonly float damper = 5f;
+
     public GameObject nodePrefab;  // simple empty GameObject or tiny mesh without Rigidbody/Collider
 
     private Rigidbody centralNode;
@@ -35,10 +37,11 @@ public class SoftBodyGenerator : MonoBehaviour
 
         centralNode = centralGO.AddComponent<Rigidbody>();
         centralNode.mass = nodeMass * nodeCount;  // heavier so surface nodes drag it
-        centralNode.drag = 0.5f;
+
+        centralNode.linearDamping = 0f;
     }
 
-    // 2) Distribute nodes on sphere via golden‐ratio method
+    // 2) Distribute nodes on sphere via golden?ratio method
     void GenerateSurfaceNodes()
     {
         float offset = 2f / nodeCount;
@@ -57,12 +60,14 @@ public class SoftBodyGenerator : MonoBehaviour
             var nodeGO = Instantiate(nodePrefab, worldPos, Quaternion.identity, transform);
             var rb = nodeGO.AddComponent<Rigidbody>();
             rb.mass = nodeMass;
-            rb.drag = 0.5f;
+            rb.freezeRotation = true;
+
+            rb.linearDamping = 0f;
             nodes.Add(rb);
 
             // small collider to hit the ground
             var col = nodeGO.AddComponent<SphereCollider>();
-            col.radius = 0.08f;
+            col.radius = 0.04f;
         }
     }
 
@@ -76,8 +81,10 @@ public class SoftBodyGenerator : MonoBehaviour
             sj.connectedBody = centralNode;
             sj.spring = spring;
             sj.damper = damper;
-            sj.minDistance = restLen * 0.9f;
-            sj.maxDistance = restLen * 1.1f;
+            sj.minDistance = radius;
+            sj.maxDistance = radius;
+            sj.tolerance = 0.005f;
+            sj.autoConfigureConnectedAnchor = false;
 
             // track that (central, rb) is “connected” if needed later
             connectedPair.Add((-1, nodes.IndexOf(rb)));
@@ -88,38 +95,54 @@ public class SoftBodyGenerator : MonoBehaviour
     void ConnectNearestNeighborSprings()
     {
         int N = nodes.Count;
+        int k = 7;  // number of nearest neighbors to connect
+
         for (int i = 0; i < N; i++)
         {
-            float minDist = float.MaxValue;
-            int bestJ = -1;
-
-            // find nearest neighbor not yet paired with i
+            // build list of distances to all other nodes
+            List<(float dist, int idx)> distances = new List<(float, int)>(N - 1);
             for (int j = 0; j < N; j++)
             {
                 if (i == j) continue;
-                var pair = (Math.Min(i, j), Math.Max(i, j));
-                if (connectedPair.Contains(pair)) continue;
-
-                float d = Vector3.Distance(nodes[i].position, nodes[j].position);
-                if (d < minDist)
-                {
-                    minDist = d;
-                    bestJ = j;
-                }
+                distances.Add((Vector3.Distance(nodes[i].position, nodes[j].position), j));
             }
 
-            if (bestJ >= 0)
+            // sort ascending by distance
+            distances.Sort((a, b) => a.dist.CompareTo(b.dist));
+
+            // take up to k closest neighbors
+            int neighbors = Mathf.Min(k, distances.Count);
+            for (int n = 0; n < neighbors; n++)
             {
-                // create spring A→B
+                int j = distances[n].idx;
+                var pair = (Math.Min(i, j), Math.Max(i, j));
+                if (connectedPair.Contains(pair))
+                    continue;
+
+                float restDist = distances[n].dist;
                 var sj = nodes[i].gameObject.AddComponent<SpringJoint>();
-                sj.connectedBody = nodes[bestJ];
-                sj.spring = spring;
+                sj.connectedBody = nodes[j];
+                sj.spring = springSurface;
                 sj.damper = damper;
-                //sj.minDistance = minDist * 0.9f;
-                //sj.maxDistance = minDist * 1.1f;
+                sj.minDistance = restDist * 0.95f;
+                sj.maxDistance = restDist * 1.05f;
+                sj.autoConfigureConnectedAnchor = false;
 
                 // mark pair so we never double-connect
-                connectedPair.Add((Math.Min(i, bestJ), Math.Max(i, bestJ)));
+                connectedPair.Add(pair);
+            }
+        }
+    }
+
+    // Draw every SpringJoint as a line between its two bodies
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        foreach (var sj in GetComponentsInChildren<SpringJoint>())
+        {
+            if (sj.connectedBody != null)
+            {
+                Gizmos.DrawLine(sj.transform.position, sj.connectedBody.transform.position);
             }
         }
     }
