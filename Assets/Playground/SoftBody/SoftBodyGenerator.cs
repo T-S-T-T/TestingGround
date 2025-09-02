@@ -8,7 +8,7 @@ public class SoftBodyGenerator : MonoBehaviour
     [Header("Soft-Body Settings")]
     private readonly int nodeCount = 200;
     private readonly float radius = 1f;
-    private readonly float nodeMass = 0.1f;
+    private readonly float nodeMass = 0f;
     private readonly float spring = 100f;
     private readonly float springSurface = 1000f;
     private readonly float damper = 5f;
