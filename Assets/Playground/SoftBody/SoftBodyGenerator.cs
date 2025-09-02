@@ -6,9 +6,9 @@ using UnityEngine;
 public class SoftBodyGenerator : MonoBehaviour
 {
     [Header("Soft-Body Settings")]
-    private readonly int nodeCount = 200;
-    private readonly float radius = 1f;
-    private readonly float nodeMass = 0f;
+    private readonly int nodeCount = 50;
+    private readonly float radius = 0.5f;
+    private readonly float nodeMass = 0.001f;
     private readonly float spring = 100f;
     private readonly float springSurface = 1000f;
     private readonly float damper = 5f;
@@ -95,7 +95,7 @@ public class SoftBodyGenerator : MonoBehaviour
     void ConnectNearestNeighborSprings()
     {
         int N = nodes.Count;
-        int k = 7;  // number of nearest neighbors to connect
+        int k = 5;  // number of nearest neighbors to connect
 
         for (int i = 0; i < N; i++)
         {
