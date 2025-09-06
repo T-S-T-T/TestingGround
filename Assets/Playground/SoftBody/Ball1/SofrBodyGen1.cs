@@ -15,7 +15,7 @@ public class SoftBodyController : MonoBehaviour
 
     [Header("Connectivity")]
     public int kNearest = 7;
-    public int kFurthest = 3;
+    //public int kFurthest = 3;
 
     [Header("Prefabs")]
     public GameObject nodePrefab;
@@ -100,12 +100,12 @@ public class SoftBodyController : MonoBehaviour
             for (int n = 0; n < near; n++)
                 AddSpring(i, list[n].idx, list[n].dist, springSurface);
 
-            int far = Mathf.Min(kFurthest, list.Count);
-            for (int n = 0; n < far; n++)
-            {
-                int idx = list.Count - 1 - n;
-                AddSpring(i, list[idx].idx, list[idx].dist, springSurface);
-            }
+            //int far = Mathf.Min(kFurthest, list.Count);
+            //for (int n = 0; n < far; n++)
+            //{
+            //    int idx = list.Count - 1 - n;
+            //    AddSpring(i, list[idx].idx, list[idx].dist, springSurface);
+            //}
         }
     }
 
