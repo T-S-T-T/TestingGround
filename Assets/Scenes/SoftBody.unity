@@ -704,11 +704,10 @@ MonoBehaviour:
   nodeCount: 200
   radius: 1
   nodeMass: 0.1
-  springCentral: 100
+  springCentral: 500
   springSurface: 100
   damper: 5
   kNearest: 7
-  kFurthest: 3
   nodePrefab: {fileID: 484797452229800329, guid: ecab92c80f6b02646bd300c56700a7b6, type: 3}
 --- !u!54 &1842868570
 Rigidbody:
