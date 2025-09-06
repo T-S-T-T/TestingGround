@@ -63,11 +63,6 @@ public class SoftBodyGenerator : MonoBehaviour
         vcamGO.transform.SetParent(go.transform);
         vcamGO.transform.localPosition = new Vector3(0f, 2f, -4f);
         vcamGO.transform.localRotation = Quaternion.identity;
-
-        var vcam = vcamGO.AddComponent<CinemachineCamera>();
-        vcam.Follow = go.transform;
-        vcam.LookAt = go.transform;
-        vcam.Lens.FieldOfView = 60f;
     }
 
     // 2) Spawn all nodes on a sphere surface

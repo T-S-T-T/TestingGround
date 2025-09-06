@@ -7,7 +7,7 @@ using UnityEngine;
 public class CentralNodeController : MonoBehaviour
 {
     [Tooltip("Force applied per frame based on input")]
-    public float moveForce = 10f;
+    public float moveForce = 100f;
 
     private Rigidbody rb;
 
