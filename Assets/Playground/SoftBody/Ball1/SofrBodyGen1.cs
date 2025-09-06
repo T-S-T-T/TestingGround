@@ -9,8 +9,8 @@ public class SoftBodyController : MonoBehaviour
     public int nodeCount = 200;
     public float radius = 1f;
     public float nodeMass = 0.1f;
-    public float springCentral = 100f;
-    public float springSurface = 1000f;
+    public float springCentral = 500f;
+    public float springSurface = 100f;
     public float damper = 5f;
 
     [Header("Connectivity")]
