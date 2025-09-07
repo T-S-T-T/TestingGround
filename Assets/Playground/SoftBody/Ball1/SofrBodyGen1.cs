@@ -118,8 +118,8 @@ public class SoftBodyController : MonoBehaviour
         sj.connectedBody = nodes[b];
         sj.spring = stiffness;
         sj.damper = damper;
-        sj.minDistance = restLen * 0.95f;
-        sj.maxDistance = restLen * 1.05f;
+        sj.minDistance = restLen * 0.995f;
+        sj.maxDistance = restLen * 1.005f;
         sj.autoConfigureConnectedAnchor = false;
         connectedPairs.Add(key);
     }

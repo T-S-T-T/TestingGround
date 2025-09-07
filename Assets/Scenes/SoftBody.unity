@@ -667,6 +667,7 @@ GameObject:
   - component: {fileID: 1842868569}
   - component: {fileID: 1842868571}
   - component: {fileID: 1842868570}
+  - component: {fileID: 1842868572}
   m_Layer: 0
   m_Name: CentralNode
   m_TagString: Untagged
@@ -749,6 +750,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveForce: 100
+--- !u!135 &1842868572
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1842868567}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2100856557
 GameObject:
   m_ObjectHideFlags: 0
