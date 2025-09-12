@@ -14,7 +14,7 @@ public class ClusterCoreMovement1 : MonoBehaviour
     public float ZMax = 8f;
 
     // Internal movement direction
-    private Vector3 direction;
+    public Vector3 direction;
 
     void Start()
     {
