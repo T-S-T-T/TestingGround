@@ -33,9 +33,17 @@ public class ClusterVisual1 : MonoBehaviour
 
                     if (offset.magnitude <= maxRange)
                     {
-                        Debug.Log(offset.magnitude);
                         Vector3 spawnPos = center + offset;
                         GameObject member = Instantiate(memberPrefab, spawnPos, Quaternion.identity);
+
+                        // 1) Grab the MemberMovement1 component
+                        MemberMovement1 mover = member.GetComponent<MemberMovement1>();
+
+                        // 2) If it exists, assign this core’s Transform (or GameObject)
+                        if (mover != null)
+                        {
+                            mover.core = gameObject;
+                        }
 
                     }
                 }
