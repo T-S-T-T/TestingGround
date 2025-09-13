@@ -16,6 +16,10 @@ public class ClusterCoreMovement1 : MonoBehaviour
     // Internal movement direction
     public Vector3 direction;
 
+    private void Awake()
+    {
+        Debug.Log(transform.position);
+    }
     void Start()
     {
         // Random values on each axis, then normalize to unit length
