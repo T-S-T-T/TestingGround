@@ -250,6 +250,7 @@ GameObject:
   m_Component:
   - component: {fileID: 638267511}
   - component: {fileID: 638267512}
+  - component: {fileID: 638267513}
   m_Layer: 0
   m_Name: ClusterCore
   m_TagString: Untagged
@@ -293,6 +294,18 @@ MonoBehaviour:
   ZMin: -10
   ZMax: 10
   direction: {x: 0.5, y: 0.2, z: 0.1}
+--- !u!114 &638267513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 638267510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e8c68a5b95d8464e8d228091118cfa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1022423057
 PrefabInstance:
   m_ObjectHideFlags: 0
