@@ -33,8 +33,10 @@ public class ClusterVisual1 : MonoBehaviour
 
                     if (offset.magnitude <= maxRange)
                     {
+                        Debug.Log(offset.magnitude);
                         Vector3 spawnPos = center + offset;
-                        Instantiate(memberPrefab, spawnPos, Quaternion.identity);
+                        GameObject member = Instantiate(memberPrefab, spawnPos, Quaternion.identity);
+
                     }
                 }
             }
