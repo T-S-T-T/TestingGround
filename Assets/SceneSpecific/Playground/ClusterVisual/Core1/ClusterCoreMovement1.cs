@@ -6,12 +6,12 @@ public class ClusterCoreMovement1 : MonoBehaviour
     public float speed = 5f;                     // Movement speed in units/sec
 
     [Header("Axis Bounds")]
-    public float XMin = -10f;
-    public float XMax = 10f;
-    public float YMin = 0f;
-    public float YMax = 5f;
-    public float ZMin = -8f;
-    public float ZMax = 8f;
+    public float xMin = -10f;
+    public float xMax = 10f;
+    public float yMin = 5f;
+    public float yMax = 25f;
+    public float zMin = -10f;
+    public float zMax = 10f;
 
     // Internal movement direction
     public Vector3 direction;
@@ -41,24 +41,24 @@ public class ClusterCoreMovement1 : MonoBehaviour
         Vector3 pos = transform.position;
 
         // Bounce on X
-        if (pos.x < XMin || pos.x > XMax)
+        if (pos.x < xMin || pos.x > xMax)
         {
             direction.x = -direction.x;
-            pos.x = Mathf.Clamp(pos.x, XMin, XMax);
+            pos.x = Mathf.Clamp(pos.x, xMin, xMax);
         }
 
         // Bounce on Y
-        if (pos.y < YMin || pos.y > YMax)
+        if (pos.y < yMin || pos.y > yMax)
         {
             direction.y = -direction.y;
-            pos.y = Mathf.Clamp(pos.y, YMin, YMax);
+            pos.y = Mathf.Clamp(pos.y, yMin, yMax);
         }
 
         // Bounce on Z
-        if (pos.z < ZMin || pos.z > ZMax)
+        if (pos.z < zMin || pos.z > zMax)
         {
             direction.z = -direction.z;
-            pos.z = Mathf.Clamp(pos.z, ZMin, ZMax);
+            pos.z = Mathf.Clamp(pos.z, zMin, zMax);
         }
 
         transform.position = pos;
@@ -70,14 +70,14 @@ public class ClusterCoreMovement1 : MonoBehaviour
         // Draw the boundary box
         Gizmos.color = Color.cyan;
         Vector3 center = new Vector3(
-            (XMin + XMax) * 0.5f,
-            (YMin + YMax) * 0.5f,
-            (ZMin + ZMax) * 0.5f
+            (xMin + xMax) * 0.5f,
+            (yMin + yMax) * 0.5f,
+            (zMin + zMax) * 0.5f
         );
         Vector3 size = new Vector3(
-            Mathf.Abs(XMax - XMin),
-            Mathf.Abs(YMax - YMin),
-            Mathf.Abs(ZMax - ZMin)
+            Mathf.Abs(xMax - xMin),
+            Mathf.Abs(yMax - yMin),
+            Mathf.Abs(zMax - zMin)
         );
         Gizmos.DrawWireCube(center, size);
 
