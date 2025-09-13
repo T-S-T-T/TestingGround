@@ -14,7 +14,13 @@ public class ClusterVisual1 : MonoBehaviour
 
     void SpawnMembers()
     {
-        Vector3 center = transform.position;
+        Vector3 rawCenter = transform.position;
+        Vector3 center = new Vector3(
+            Mathf.Round(rawCenter.x),
+            Mathf.Round(rawCenter.y),
+            Mathf.Round(rawCenter.z)
+        );
+
         int steps = Mathf.CeilToInt(maxRange / spacing);
 
         for (int x = -steps; x <= steps; x++)
