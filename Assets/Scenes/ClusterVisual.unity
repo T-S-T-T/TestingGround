@@ -129,7 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 258574761}
   m_Layer: 0
-  m_Name: Member
+  m_Name: Member1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -392,7 +392,7 @@ GameObject:
   - component: {fileID: 638267512}
   - component: {fileID: 638267513}
   m_Layer: 0
-  m_Name: ClusterCore
+  m_Name: Core1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
