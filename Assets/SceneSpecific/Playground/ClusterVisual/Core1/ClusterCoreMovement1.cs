@@ -20,9 +20,9 @@ public class ClusterCoreMovement1 : MonoBehaviour
     {
         // Random values on each axis, then normalize to unit length
         Vector3 raw = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f)
+            Random.Range(-100f, 100f),
+            Random.Range(-100f, 100f),
+            Random.Range(-100f, 100f)
         );
 
         // If raw is ever (0,0,0), pick a default
