@@ -165,6 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   core: {fileID: 0}
+  distance: 0
 --- !u!1 &301366821
 GameObject:
   m_ObjectHideFlags: 0
@@ -439,7 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   memberPrefab: {fileID: 258574760}
-  spacing: 1
+  spacing: 0.5
   maxRange: 5
 --- !u!1001 &1022423057
 PrefabInstance:

@@ -5,9 +5,8 @@ public class ClusterVisual1 : MonoBehaviour
     [Header("Member Settings")]
     public GameObject memberPrefab;     // Assign your Member prefab here
 
-
-    [HideInInspector] public float spacing = .5f;          // Distance between members along X, Y, Z
-    [HideInInspector] public float maxRange = 5f;         // Radius around core to spawn within
+    public float spacing = .1f;          // Distance between members along X, Y, Z
+    public float maxRange = 5f;         // Radius around core to spawn within
 
     void Start()
     {
