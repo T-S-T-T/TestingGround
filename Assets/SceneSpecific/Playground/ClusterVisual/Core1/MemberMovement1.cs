@@ -10,6 +10,8 @@ public class MemberMovement1 : MonoBehaviour
 
     private bool moveReady = true;
 
+    public float distance;
+
     void Start()
     {
         // Cache the core’s ClusterVisual1 for range (and spacing) data
@@ -18,24 +20,7 @@ public class MemberMovement1 : MonoBehaviour
 
     void Update()
     {
-        // Fast check using squared magnitudes
-        float r = cluster.maxRange;
-        float s = cluster.spacing;
-        if ((transform.position - core.transform.position).sqrMagnitude > r * r)
-        {
-            if (moveReady)
-            {
-                Vector3 center = RoundPosition(core.transform.position, s);
-                // 2) Compute offset from that snapped center
-                Vector3 offset = transform.position - center;
-                Vector3 mirroredOffset = -offset;
-                transform.position = center + mirroredOffset;
 
-                moveReady = false;
-            }
-
-        }
-        else moveReady = true;
     }
 
     public static Vector3 RoundPosition(Vector3 currentPos, float spacing)
