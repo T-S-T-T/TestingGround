@@ -315,7 +315,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 258574761}
@@ -420,12 +420,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  xMin: -10
-  xMax: 10
+  xMin: -20
+  xMax: 20
   yMin: 5
-  yMax: 25
-  zMin: -10
-  zMax: 10
+  yMax: 45
+  zMin: -20
+  zMax: 20
   direction: {x: 0.5, y: 0.2, z: 0.1}
 --- !u!114 &638267513
 MonoBehaviour:
@@ -440,7 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   memberPrefab: {fileID: 258574760}
-  spacing: 0.5
+  spacing: 1
   maxRange: 5
 --- !u!1001 &1022423057
 PrefabInstance:
