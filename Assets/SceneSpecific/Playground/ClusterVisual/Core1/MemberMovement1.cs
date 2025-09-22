@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class MemberMovement1 : MonoBehaviour
@@ -17,8 +18,14 @@ public class MemberMovement1 : MonoBehaviour
 
     }
 
-    public void Move(Vector3 targetPosition)
+    public void Move(Vector3 targetPosition, float delay)
     {
+        StartCoroutine(MoveAfterDelay(targetPosition, delay));
+    }
+
+    private IEnumerator MoveAfterDelay(Vector3 targetPosition, float delay)
+    {
+        yield return new WaitForSeconds(delay);
         transform.position = targetPosition;
     }
 }
