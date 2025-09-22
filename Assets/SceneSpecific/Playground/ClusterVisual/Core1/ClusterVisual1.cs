@@ -47,12 +47,13 @@ public class ClusterVisual1 : MonoBehaviour
 
     void Update()
     {
-        RunVisualFunction();
+        RunVisual();
     }
 
-    void RunVisualFunction()
+    void RunVisual()
     {
-        Vector3 core = SnapToGrid(transform.position);
+        // Use the raw core position (no snapping)
+        Vector3 core = transform.position;
 
         // Lists for recycling
         List<MemberMovement1> waitList = new List<MemberMovement1>();
@@ -108,14 +109,5 @@ public class ClusterVisual1 : MonoBehaviour
         {
             waitList[i].Move(fillList[i]);
         }
-    }
-
-    Vector3 SnapToGrid(Vector3 pos)
-    {
-        return new Vector3(
-            Mathf.Round(pos.x / spacing) * spacing,
-            Mathf.Round(pos.y / spacing) * spacing,
-            Mathf.Round(pos.z / spacing) * spacing
-        );
     }
 }

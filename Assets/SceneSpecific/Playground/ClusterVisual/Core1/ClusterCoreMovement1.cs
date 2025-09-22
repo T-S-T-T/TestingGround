@@ -18,7 +18,7 @@ public class ClusterCoreMovement1 : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log(transform.position);
+
     }
     void Start()
     {
