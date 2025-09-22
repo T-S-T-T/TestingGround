@@ -8,8 +8,11 @@ public class ClusterVisual1 : MonoBehaviour
     public float spacing = 1f;        // Grid spacing
     public float maxDistance = 5f;    // Radius around core
 
+
     private List<MemberMovement1> members = new List<MemberMovement1>();
     private HashSet<Vector3> occupied = new HashSet<Vector3>();
+
+    private float speed = 5f;
 
     void Start()
     {
@@ -47,13 +50,13 @@ public class ClusterVisual1 : MonoBehaviour
 
     void Update()
     {
-        RunVisual();
+        speed = gameObject.GetComponent<ClusterCoreMovement1>().speed;
+        RunVisualFunction();
     }
 
-    void RunVisual()
+    void RunVisualFunction()
     {
-        // Use the raw core position (no snapping)
-        Vector3 core = transform.position;
+        Vector3 core = SnapToGrid(transform.position);
 
         // Lists for recycling
         List<MemberMovement1> waitList = new List<MemberMovement1>();
@@ -98,16 +101,25 @@ public class ClusterVisual1 : MonoBehaviour
         }
 
         // (Optional) sort lists
-        waitList.Sort((a, b) =>
-            Vector3.Distance(b.transform.position, core).CompareTo(Vector3.Distance(a.transform.position, core)));
-        fillList.Sort((a, b) =>
-            Vector3.Distance(a, core).CompareTo(Vector3.Distance(b, core)));
+        waitList.Sort((a, b) => Vector3.Distance(b.transform.position, core).CompareTo(Vector3.Distance(a.transform.position, core)));
+        fillList.Sort((a, b) => Vector3.Distance(a, core).CompareTo(Vector3.Distance(b, core)));
 
         // Step 3: move members from wait → fill
         int count = Mathf.Min(waitList.Count, fillList.Count);
+        float moveDuration = spacing / speed;
         for (int i = 0; i < count; i++)
         {
-            waitList[i].Move(fillList[i]);
+            float delay = i * (moveDuration / count);
+            waitList[i].Move(fillList[i], delay);
         }
+    }
+
+    Vector3 SnapToGrid(Vector3 pos)
+    {
+        return new Vector3(
+            Mathf.Round(pos.x / spacing) * spacing,
+            Mathf.Round(pos.y / spacing) * spacing,
+            Mathf.Round(pos.z / spacing) * spacing
+        );
     }
 }
