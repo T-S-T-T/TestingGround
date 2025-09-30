@@ -72,6 +72,7 @@ public class ClusterVisual2 : MonoBehaviour
         {
             Vector3 snappedOffset = validOffsets[i];
             GameObject member = Instantiate(memberPrefab, lastSnappedPos + snappedOffset, Quaternion.identity);
+            member.GetComponent<MemberVisual2>().core = gameObject;
 
             members.Add(member);
         }
