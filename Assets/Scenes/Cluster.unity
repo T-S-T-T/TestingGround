@@ -465,6 +465,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1783983365}
+  - component: {fileID: 1783983366}
   m_Layer: 0
   m_Name: Member2
   m_TagString: Untagged
@@ -488,6 +489,18 @@ Transform:
   - {fileID: 419582098}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1783983366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783983364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31ef3412e33209247a33ac963c8131d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1770575128689793478
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,7 +565,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 5a7ca585a9b2b3c4587125916713263d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -640,6 +653,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7195a46cd956c684c97b8dcbeac082e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  memberPrefab: {fileID: 1783983364}
+  memberCount: 3000
+  minDistance: 7
+  maxDistance: 10
+  spacing: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
