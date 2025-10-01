@@ -17,17 +17,20 @@ public class MemberVisual2 : MonoBehaviour
     {
         if (core == null || clusterVisual2 == null) return;
 
-        // Distance from this member to the core
         float dist = Vector3.Distance(transform.position, core.transform.position);
 
-        // Get latest min/max from the cluster
         float min = clusterVisual2.minDistance;
         float max = clusterVisual2.maxDistance;
+        float spacing = clusterVisual2.spacing;
 
-        // Scale factor: 1 at min, 0 at max
-        float t = 1f - Mathf.InverseLerp(min, max, dist);
+        // Shrink the range by 10% on both sides
+        float innerMin = min + spacing;
+        float innerMax = max - spacing;
 
-        // Apply scale uniformly
+        // Scale factor: 1 at innerMin, 0 at innerMax
+        float t = 1f - Mathf.InverseLerp(innerMin, innerMax, dist);
+
         transform.localScale = Vector3.one * t;
     }
+
 }

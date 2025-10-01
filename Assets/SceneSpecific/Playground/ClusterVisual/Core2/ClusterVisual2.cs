@@ -15,6 +15,13 @@ public class ClusterVisual2 : MonoBehaviour
 
     void Start()
     {
+
+        //Make sure the distance and spacing is correct\
+        if ((maxDistance - spacing)<=(minDistance + spacing))
+        {
+            maxDistance = (float)(minDistance + spacing * 2.5);
+        }
+
         lastSnappedPos = SnapToGrid(transform.position);
 
         SpawnMembers();

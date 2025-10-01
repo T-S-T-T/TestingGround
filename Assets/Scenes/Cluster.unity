@@ -656,10 +656,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   memberPrefab: {fileID: 1783983364}
-  memberCount: 3000
+  memberCount: 4000
   minDistance: 3
-  maxDistance: 5
-  spacing: 0.5
+  maxDistance: 7
+  spacing: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
