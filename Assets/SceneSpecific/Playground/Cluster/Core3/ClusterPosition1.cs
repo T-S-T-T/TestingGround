@@ -17,7 +17,7 @@ public class ClusterPosition1 : MonoBehaviour
     {
         //GenerateRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, FormationType.Random);
         //GenerateCurvedRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, 45f, 10f, FormationType.Diamond);
-        GenerateCircle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
+        GenerateCircleArea(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
     }
 
     // Update is called once per frame
@@ -207,7 +207,7 @@ public class ClusterPosition1 : MonoBehaviour
     }
 
 
-    public void GenerateCircle(int memberCount,Vector3 spawnPosition,Vector3 spawnDirection,float radius,FormationType formation = FormationType.Grid)
+    public void GenerateCircleArea(int memberCount, Vector3 spawnPosition, Vector3 spawnDirection, float radius, FormationType formation = FormationType.Grid)
     {
         nodePositions.Clear();
 
@@ -223,73 +223,121 @@ public class ClusterPosition1 : MonoBehaviour
         switch (formation)
         {
             case FormationType.Grid:
-                GenerateCircleGrid(memberCount, spawnPosition, right, up, radius);
+                GenerateCircleAreaGrid(memberCount, spawnPosition, right, up, radius);
                 break;
 
             case FormationType.Diamond:
-                GenerateCircleDiamond(memberCount, spawnPosition, right, up, radius);
+                GenerateCircleAreaDiamond(memberCount, spawnPosition, right, up, radius);
                 break;
 
             case FormationType.Random:
-                GenerateCircleRandom(memberCount, spawnPosition, right, up, radius);
+                GenerateCircleAreaRandom(memberCount, spawnPosition, right, up, radius);
                 break;
 
             case FormationType.CenterFan:
-                GenerateCircleCenterFan(memberCount, spawnPosition, right, up, radius);
+                GenerateCircleAreaCenterFan(memberCount, spawnPosition, right, up, radius);
                 break;
         }
     }
 
-    private void GenerateCircleGrid(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
+    private void GenerateCircleAreaGrid(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
     {
-        for (int i = 0; i < memberCount; i++)
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount)); // number of concentric rings
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
         {
-            float angle = (i / (float)memberCount) * Mathf.PI * 2f;
-            Vector3 pos = center + Mathf.Cos(angle) * right * radius + Mathf.Sin(angle) * up * radius;
-            nodePositions.Add(pos);
+            float ringRadius = (r / (float)(rings - 1)) * radius;
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center); // center node
+                }
+                else
+                {
+                    float angle = (i / (float)pointsInRing) * Mathf.PI * 2f;
+                    Vector3 pos = center + Mathf.Cos(angle) * right * ringRadius + Mathf.Sin(angle) * up * ringRadius;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
         }
     }
 
-    private void GenerateCircleDiamond(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
+    private void GenerateCircleAreaDiamond(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
     {
-        for (int i = 0; i < memberCount; i++)
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
         {
-            float angle = ((i + (i % 2 == 1 ? 0.5f : 0f)) / (float)memberCount) * Mathf.PI * 2f;
-            Vector3 pos = center + Mathf.Cos(angle) * right * radius + Mathf.Sin(angle) * up * radius;
-            nodePositions.Add(pos);
+            float ringRadius = (r / (float)(rings - 1)) * radius;
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                float offset = (r % 2 == 1) ? 0.5f : 0f; // stagger odd rings
+                float angle = ((i + offset) / (float)pointsInRing) * Mathf.PI * 2f;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center);
+                }
+                else
+                {
+                    Vector3 pos = center + Mathf.Cos(angle) * right * ringRadius + Mathf.Sin(angle) * up * ringRadius;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
         }
     }
 
-    private void GenerateCircleRandom(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
+    private void GenerateCircleAreaRandom(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
     {
         for (int i = 0; i < memberCount; i++)
         {
+            // Use sqrt(Random) to ensure uniform density across area
+            float r = radius * Mathf.Sqrt(Random.value);
             float angle = Random.value * Mathf.PI * 2f;
-            Vector3 pos = center + Mathf.Cos(angle) * right * radius + Mathf.Sin(angle) * up * radius;
+
+            Vector3 pos = center + Mathf.Cos(angle) * right * r + Mathf.Sin(angle) * up * r;
             nodePositions.Add(pos);
         }
     }
 
-    private void GenerateCircleCenterFan(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
+    private void GenerateCircleAreaCenterFan(int memberCount, Vector3 center, Vector3 right, Vector3 up, float radius)
     {
         if (memberCount <= 0) return;
 
-        // Always put one node at the center
-        nodePositions.Add(center);
-
+        nodePositions.Add(center); // always one in the middle
         if (memberCount == 1) return;
 
-        // Remaining nodes fan out evenly around the circle
-        int outerCount = memberCount - 1;
-        for (int i = 0; i < outerCount; i++)
+        int spokes = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int rings = Mathf.CeilToInt((float)memberCount / spokes);
+
+        int placed = 1;
+        for (int r = 1; r < rings; r++)
         {
-            float angle = (i / (float)outerCount) * Mathf.PI * 2f;
-            Vector3 pos = center + Mathf.Cos(angle) * right * radius + Mathf.Sin(angle) * up * radius;
-            nodePositions.Add(pos);
+            float ringRadius = (r / (float)(rings - 1)) * radius;
+            for (int s = 0; s < spokes; s++)
+            {
+                if (placed >= memberCount) return;
+
+                float angle = (s / (float)spokes) * Mathf.PI * 2f;
+                Vector3 pos = center + Mathf.Cos(angle) * right * ringRadius + Mathf.Sin(angle) * up * ringRadius;
+                nodePositions.Add(pos);
+                placed++;
+            }
         }
     }
-
-
 
     private void OnDrawGizmos()
     {
