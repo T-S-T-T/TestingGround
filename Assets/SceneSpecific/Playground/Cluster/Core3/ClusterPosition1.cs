@@ -17,7 +17,9 @@ public class ClusterPosition1 : MonoBehaviour
     {
         //GenerateRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, FormationType.Random);
         //GenerateCurvedRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, 45f, 10f, FormationType.Diamond);
-        GenerateCircleArea(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
+        //GenerateCircleArea(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
+        //GenerateParaboloid(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 10f, FormationType.Diamond);
+        GenerateCone(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 10f, FormationType.CenterFan);
     }
 
     // Update is called once per frame
@@ -338,6 +340,321 @@ public class ClusterPosition1 : MonoBehaviour
             }
         }
     }
+
+
+    public void GenerateParaboloid(int memberCount, Vector3 spawnPosition, Vector3 spawnDirection, float radius, float height, FormationType formation = FormationType.Grid)
+    {
+        nodePositions.Clear();
+
+        // Orientation setup
+        Vector3 forward = spawnDirection.normalized;
+        Vector3 up = Vector3.up;
+        if (Vector3.Dot(forward, up) > 0.99f)
+            up = Vector3.right;
+
+        Vector3 right = Vector3.Cross(up, forward).normalized;
+        up = Vector3.Cross(forward, right).normalized;
+
+        switch (formation)
+        {
+            case FormationType.Grid:
+                GenerateParaboloidGrid(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.Diamond:
+                GenerateParaboloidDiamond(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.Random:
+                GenerateParaboloidRandom(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.CenterFan:
+                GenerateParaboloidCenterFan(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+        }
+    }
+
+    private void GenerateParaboloidGrid(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);
+            float ringRadius = t * radius;
+            float z = (t * t) * height; // paraboloid curve
+
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center); // apex
+                }
+                else
+                {
+                    float angle = (i / (float)pointsInRing) * Mathf.PI * 2f;
+                    Vector3 pos = center
+                        + right * Mathf.Cos(angle) * ringRadius
+                        + up * Mathf.Sin(angle) * ringRadius
+                        + forward * z;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
+        }
+    }
+
+    private void GenerateParaboloidDiamond(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);
+            float ringRadius = t * radius;
+            float z = (t * t) * height;
+
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                float offset = (r % 2 == 1) ? 0.5f : 0f;
+                float angle = ((i + offset) / (float)pointsInRing) * Mathf.PI * 2f;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center);
+                }
+                else
+                {
+                    Vector3 pos = center
+                        + right * Mathf.Cos(angle) * ringRadius
+                        + up * Mathf.Sin(angle) * ringRadius
+                        + forward * z;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
+        }
+    }
+
+    private void GenerateParaboloidRandom(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        for (int i = 0; i < memberCount; i++)
+        {
+            float r = radius * Mathf.Sqrt(Random.value); // uniform in disk
+            float angle = Random.value * Mathf.PI * 2f;
+            float t = r / radius;
+            float z = (t * t) * height;
+
+            Vector3 pos = center
+                + right * Mathf.Cos(angle) * r
+                + up * Mathf.Sin(angle) * r
+                + forward * z;
+
+            nodePositions.Add(pos);
+        }
+    }
+
+    private void GenerateParaboloidCenterFan(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        if (memberCount <= 0) return;
+
+        nodePositions.Add(center); // apex
+        if (memberCount == 1) return;
+
+        int spokes = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int rings = Mathf.CeilToInt((float)memberCount / spokes);
+
+        int placed = 1;
+        for (int r = 1; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);
+            float ringRadius = t * radius;
+            float z = (t * t) * height;
+
+            for (int s = 0; s < spokes; s++)
+            {
+                if (placed >= memberCount) return;
+
+                float angle = (s / (float)spokes) * Mathf.PI * 2f;
+                Vector3 pos = center
+                    + right * Mathf.Cos(angle) * ringRadius
+                    + up * Mathf.Sin(angle) * ringRadius
+                    + forward * z;
+
+                nodePositions.Add(pos);
+                placed++;
+            }
+        }
+    }
+
+
+    public void GenerateCone(int memberCount, Vector3 spawnPosition, Vector3 spawnDirection, float radius, float height, FormationType formation = FormationType.Grid)
+    {
+        nodePositions.Clear();
+
+        // Orientation setup
+        Vector3 forward = spawnDirection.normalized;
+        Vector3 up = Vector3.up;
+        if (Vector3.Dot(forward, up) > 0.99f)
+            up = Vector3.right;
+
+        Vector3 right = Vector3.Cross(up, forward).normalized;
+        up = Vector3.Cross(forward, right).normalized;
+
+        switch (formation)
+        {
+            case FormationType.Grid:
+                GenerateConeGrid(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.Diamond:
+                GenerateConeDiamond(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.Random:
+                GenerateConeRandom(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+
+            case FormationType.CenterFan:
+                GenerateConeCenterFan(memberCount, spawnPosition, right, up, forward, radius, height);
+                break;
+        }
+    }
+
+    private void GenerateConeGrid(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);   // 0 at apex, 1 at base
+            float ringRadius = (1 - t) * radius;
+            float z = t * height;
+
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center); // apex
+                }
+                else
+                {
+                    float angle = (i / (float)pointsInRing) * Mathf.PI * 2f;
+                    Vector3 pos = center
+                        + right * Mathf.Cos(angle) * ringRadius
+                        + up * Mathf.Sin(angle) * ringRadius
+                        + forward * z;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
+        }
+    }
+
+    private void GenerateConeDiamond(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        int rings = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int placed = 0;
+
+        for (int r = 0; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);
+            float ringRadius = (1 - t) * radius;
+            float z = t * height;
+
+            int pointsInRing = (r == 0) ? 1 : Mathf.CeilToInt(2 * Mathf.PI * ringRadius / (radius / rings));
+
+            for (int i = 0; i < pointsInRing; i++)
+            {
+                if (placed >= memberCount) return;
+
+                float offset = (r % 2 == 1) ? 0.5f : 0f;
+                float angle = ((i + offset) / (float)pointsInRing) * Mathf.PI * 2f;
+
+                if (r == 0)
+                {
+                    nodePositions.Add(center);
+                }
+                else
+                {
+                    Vector3 pos = center
+                        + right * Mathf.Cos(angle) * ringRadius
+                        + up * Mathf.Sin(angle) * ringRadius
+                        + forward * z;
+                    nodePositions.Add(pos);
+                }
+                placed++;
+            }
+        }
+    }
+
+    private void GenerateConeRandom(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        for (int i = 0; i < memberCount; i++)
+        {
+            float t = Random.value; // height fraction
+            float ringRadius = (1 - t) * radius;
+            float z = t * height;
+
+            float angle = Random.value * Mathf.PI * 2f;
+            Vector3 pos = center
+                + right * Mathf.Cos(angle) * ringRadius
+                + up * Mathf.Sin(angle) * ringRadius
+                + forward * z;
+
+            nodePositions.Add(pos);
+        }
+    }
+
+    private void GenerateConeCenterFan(int memberCount, Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float radius, float height)
+    {
+        if (memberCount <= 0) return;
+
+        nodePositions.Add(center); // apex
+        if (memberCount == 1) return;
+
+        int spokes = Mathf.CeilToInt(Mathf.Sqrt(memberCount));
+        int rings = Mathf.CeilToInt((float)memberCount / spokes);
+
+        int placed = 1;
+        for (int r = 1; r < rings; r++)
+        {
+            float t = r / (float)(rings - 1);
+            float ringRadius = (1 - t) * radius;
+            float z = t * height;
+
+            for (int s = 0; s < spokes; s++)
+            {
+                if (placed >= memberCount) return;
+
+                float angle = (s / (float)spokes) * Mathf.PI * 2f;
+                Vector3 pos = center
+                    + right * Mathf.Cos(angle) * ringRadius
+                    + up * Mathf.Sin(angle) * ringRadius
+                    + forward * z;
+
+                nodePositions.Add(pos);
+                placed++;
+            }
+        }
+    }
+
 
     private void OnDrawGizmos()
     {
