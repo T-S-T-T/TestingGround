@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ public enum FormationType
 public class ClusterPosition1 : MonoBehaviour
 {
     private List<Vector3> nodePositions = new List<Vector3>();
+
+    private float timer = 1f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -19,13 +22,50 @@ public class ClusterPosition1 : MonoBehaviour
         //GenerateCurvedRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, 45f, 10f, FormationType.Diamond);
         //GenerateCircleArea(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
         //GenerateParaboloid(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 10f, FormationType.Diamond);
-        GenerateCone(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 10f, FormationType.CenterFan);
+        //GenerateCone(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 10f, FormationType.CenterFan);
+
+        StartCoroutine(CycleFormations());
     }
 
     // Update is called once per frame
     void Update()
     {
 
+    }
+
+    IEnumerator CycleFormations()
+    {
+        Vector3 basePosition = transform.position + new Vector3(10, 10, 10);
+        Vector3 direction = transform.forward;
+
+        FormationType[] modes = new FormationType[]
+        {
+            FormationType.Grid,
+            FormationType.Diamond,
+            FormationType.Random,
+            FormationType.CenterFan
+        };
+
+        while (true)
+        {
+            foreach (var mode in modes)
+            {
+                GenerateRectangle(100, basePosition, direction, 5f, 3f, mode);
+                yield return new WaitForSeconds(timer);
+
+                GenerateCurvedRectangle(100, basePosition, direction, 5f, 3f, 45f, 10f, mode);
+                yield return new WaitForSeconds(timer);
+
+                GenerateCircleArea(1000, basePosition, direction, 5f, mode);
+                yield return new WaitForSeconds(timer);
+
+                GenerateParaboloid(1000, basePosition, direction, 5f, 10f, mode);
+                yield return new WaitForSeconds(timer);
+
+                GenerateCone(1000, basePosition, direction, 5f, 10f, mode);
+                yield return new WaitForSeconds(timer);
+            }
+        }
     }
 
     public void GenerateRectangle(int memberCount, Vector3 spawnPosition, Vector3 spawnDirection, float sizeX, float sizeY, FormationType formation)
