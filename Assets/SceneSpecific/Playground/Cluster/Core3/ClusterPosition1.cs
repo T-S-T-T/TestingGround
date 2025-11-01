@@ -14,7 +14,7 @@ public class ClusterPosition1 : MonoBehaviour
 {
     private List<Vector3> nodePositions = new List<Vector3>();
 
-    private float timer = 1f;
+    private float timer = 10f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
