@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 
 public enum FormationType
@@ -12,12 +13,19 @@ public enum FormationType
 }
 public class ClusterPosition1 : MonoBehaviour
 {
+
+    private ClusterSpawn1 clusterSpawn1;
+
     private List<Vector3> nodePositions = new List<Vector3>();
 
+    private int nodeCount = 0;
     private float timer = 10f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+
+        clusterSpawn1 = GetComponent<ClusterSpawn1>();
+
         //GenerateRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, FormationType.Random);
         //GenerateCurvedRectangle(100, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, 3f, 45f, 10f, FormationType.Diamond);
         //GenerateCircleArea(1000, transform.position + new Vector3(10, 10, 10), transform.forward, 5f, FormationType.Diamond);
@@ -30,12 +38,15 @@ public class ClusterPosition1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (clusterSpawn1 != null)
+        {
+            timer = clusterSpawn1.MemberCount;
+        }
     }
 
     IEnumerator CycleFormations()
     {
-        Vector3 basePosition = transform.position + new Vector3(10, 10, 10);
+        Vector3 basePosition = transform.position + new Vector3(0, 0, 10);
         Vector3 direction = transform.forward;
 
         FormationType[] modes = new FormationType[]
