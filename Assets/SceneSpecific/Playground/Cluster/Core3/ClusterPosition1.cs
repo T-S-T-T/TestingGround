@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
@@ -18,7 +19,7 @@ public class ClusterPosition1 : MonoBehaviour
 
     private List<Vector3> nodePositions = new List<Vector3>();
 
-    private int nodeCount = 0;
+    private int nodeCount;
     private float timer = 10f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -40,7 +41,7 @@ public class ClusterPosition1 : MonoBehaviour
     {
         if (clusterSpawn1 != null)
         {
-            timer = clusterSpawn1.MemberCount;
+            nodeCount = clusterSpawn1.MemberCount;
         }
     }
 
@@ -61,24 +62,69 @@ public class ClusterPosition1 : MonoBehaviour
         {
             foreach (var mode in modes)
             {
-                GenerateRectangle(100, basePosition, direction, 5f, 3f, mode);
+                GenerateRectangle(nodeCount, basePosition, direction, 5f, 3f, mode);
+                AssignNode();
                 yield return new WaitForSeconds(timer);
 
-                GenerateCurvedRectangle(100, basePosition, direction, 5f, 3f, 45f, 10f, mode);
+                GenerateCurvedRectangle(nodeCount, basePosition, direction, 5f, 3f, 45f, 10f, mode);
+                AssignNode();
                 yield return new WaitForSeconds(timer);
 
-                GenerateCircleArea(1000, basePosition, direction, 5f, mode);
+                GenerateCircleArea(nodeCount, basePosition, direction, 5f, mode);
+                AssignNode();
                 yield return new WaitForSeconds(timer);
 
-                GenerateParaboloid(1000, basePosition, direction, 5f, 10f, mode);
+                GenerateParaboloid(nodeCount, basePosition, direction, 5f, 10f, mode);
+                AssignNode();
                 yield return new WaitForSeconds(timer);
 
-                GenerateCone(1000, basePosition, direction, 5f, 10f, mode);
+                GenerateCone(nodeCount, basePosition, direction, 5f, 10f, mode);
+                AssignNode();
                 yield return new WaitForSeconds(timer);
             }
         }
     }
 
+    public void AssignNode()
+    {
+
+        List<GameObject> members = clusterSpawn1.members;
+        // Use the smaller count to avoid mismatches
+        int count = Mathf.Min(nodePositions.Count, members.Count);
+
+        // Make a working copy of nodes so we can remove them as we assign
+        List<Vector3> availableNodes = new List<Vector3>(nodePositions);
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject member = members[i];
+            if (member == null) continue;
+
+            MemberMovement2 movement = member.GetComponent<MemberMovement2>();
+            if (movement == null) continue;
+
+            // Find the closest available node
+            Vector3 closestNode = availableNodes[0];
+            float closestDist = Vector3.Distance(member.transform.position, closestNode);
+
+            foreach (Vector3 node in availableNodes)
+            {
+                float dist = Vector3.Distance(member.transform.position, node);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closestNode = node;
+                }
+            }
+
+            // Assign node and move
+            movement.node = closestNode;
+            movement.MoveToNode();
+
+            // Remove this node so no one else can use it
+            availableNodes.Remove(closestNode);
+        }
+    }
     public void GenerateRectangle(int memberCount, Vector3 spawnPosition, Vector3 spawnDirection, float sizeX, float sizeY, FormationType formation)
     {
         nodePositions.Clear();
