@@ -19,11 +19,20 @@ public class MemberMovement2 : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        // Only move if node is set and not already at the target
-        if (node != Vector3.zero && Vector3.Distance(transform.position, node) > 0.1f)
+        if (node != Vector3.zero)
         {
-            Vector3 direction = (node - transform.position).normalized;
-            rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+            float distance = Vector3.Distance(transform.position, node);
+
+            if (distance > 0.1f) // tolerance zone
+            {
+                Vector3 direction = (node - transform.position).normalized;
+                rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+            }
+            else
+            {
+                // Snap to node and stop moving
+                rb.MovePosition(node);
+            }
         }
     }
 
