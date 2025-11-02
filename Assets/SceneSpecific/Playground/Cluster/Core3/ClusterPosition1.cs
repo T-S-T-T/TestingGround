@@ -119,7 +119,7 @@ public class ClusterPosition1 : MonoBehaviour
 
             // Assign node and move
             movement.node = closestNode;
-            movement.MoveToNode();
+            //movement.MoveToNode();
 
             // Remove this node so no one else can use it
             availableNodes.Remove(closestNode);
