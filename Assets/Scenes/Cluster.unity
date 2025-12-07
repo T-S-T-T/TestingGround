@@ -500,6 +500,7 @@ GameObject:
   - component: {fileID: 1710480184}
   - component: {fileID: 1710480183}
   - component: {fileID: 1710480185}
+  - component: {fileID: 1710480186}
   m_Layer: 0
   m_Name: Member4
   m_TagString: Untagged
@@ -548,8 +549,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db3a5cd816df7d4cb90b64268d5e0d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minBounds: {x: -10, y: -5, z: -10}
-  maxBounds: {x: 10, y: 5, z: 10}
+  minBounds: {x: -10, y: 5, z: -10}
+  maxBounds: {x: 10, y: 25, z: 10}
+--- !u!114 &1710480186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1710480182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e919bd962113c74baddba015d03380d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2013164698
 GameObject:
   m_ObjectHideFlags: 0
