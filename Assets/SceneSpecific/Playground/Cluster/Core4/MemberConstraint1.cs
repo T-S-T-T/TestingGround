@@ -3,8 +3,8 @@ using UnityEngine;
 public class MemberConstraint1 : MonoBehaviour
 {
     [Header("Boundary Settings")]
-    private Vector3 minBounds = new Vector3(-50f, 5f, -50f);
-    private Vector3 maxBounds = new Vector3(50f, 55f, 50f);
+    private Vector3 minBounds = new Vector3(-10f, 5f, -10f);
+    private Vector3 maxBounds = new Vector3(10f, 25f, 10f);
 
     void Update()
     {
