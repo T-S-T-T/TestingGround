@@ -56,6 +56,7 @@ public class MemberMovement3 : MonoBehaviour
             // Check if neighbor is in front (within viewAngle)
             if (Vector3.Angle(Direction, toNeighborDir) < viewAngle * 0.5f)
             {
+                Debug.Log("Neighbor in view!");
                 neighborCount++;
 
                 // Separation: steer away
@@ -65,6 +66,7 @@ public class MemberMovement3 : MonoBehaviour
                 MemberMovement3 other = neighbor.GetComponent<MemberMovement3>();
                 if (other != null)
                 {
+                    Debug.Log("Average heading!");
                     averageHeading += other.Direction;
                 }
 
