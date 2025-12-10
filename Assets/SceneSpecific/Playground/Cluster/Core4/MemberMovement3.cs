@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 public class MemberMovement3 : MonoBehaviour
 {
+    [Header("Movement Settings")]
     public float speed = 5f;                // movement speed
+
+    [Header("Boid Separation Settings")]
     public float viewRadius = 5f;           // how far the boid can "see"
     public float viewAngle = 120f;          // field of view in degrees (front only)
     public float separationStrength = 1f;   // how strongly to steer away
@@ -37,13 +40,18 @@ public class MemberMovement3 : MonoBehaviour
             if (neighbor.gameObject == gameObject) continue; // skip self
 
             Vector3 toNeighbor = neighbor.transform.position - transform.position;
+            float distance = toNeighbor.magnitude;
+
+            // Normalize for angle check
+            Vector3 toNeighborDir = toNeighbor.normalized;
 
             // Check if neighbor is in front (within viewAngle)
-            if (Vector3.Angle(Direction, toNeighbor) < viewAngle * 0.5f)
+            Debug.Log(Vector3.Angle(Direction, toNeighborDir));
+            if (Vector3.Angle(Direction, toNeighborDir) < viewAngle * 0.5f)
             {
-                Debug.Log("Entity detected!");
-                // Steer away: add opposite direction
-                separationForce -= toNeighbor.normalized / toNeighbor.magnitude;
+                Debug.Log("Entity in view!");
+                // Steer away: add opposite direction, weighted by distance
+                separationForce -= toNeighborDir / distance;
             }
         }
 
@@ -56,11 +64,13 @@ public class MemberMovement3 : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (Direction == Vector3.zero) return;
+
         // Draw view radius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, viewRadius);
 
-        // Draw view angle lines
+        // Draw view angle boundaries (in local forward plane)
         Gizmos.color = Color.cyan;
         Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle * 0.5f, 0) * Direction;
         Vector3 rightBoundary = Quaternion.Euler(0, viewAngle * 0.5f, 0) * Direction;
