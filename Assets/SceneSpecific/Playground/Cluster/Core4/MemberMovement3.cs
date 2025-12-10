@@ -8,12 +8,12 @@ public class MemberMovement3 : MonoBehaviour
 
     [Header("Boid Settings")]
     public float viewRadius = 5f;           // how far the boid can "see"
-    public float viewAngle = 120f;          // field of view in degrees (front only)
+    public float viewAngle = 270f;          // field of view in degrees (front only)
 
     [Header("Rule Strengths")]
-    public float separationStrength = 1f;   // how strongly to steer away
-    public float alignmentStrength = 1f;    // how strongly to align with neighbors
-    public float cohesionStrength = 1f;     // how strongly to move toward center
+    public float separationStrength = 100f;   // how strongly to steer away
+    public float alignmentStrength = 100f;    // how strongly to align with neighbors
+    public float cohesionStrength = 100f;     // how strongly to move toward center
 
     public Vector3 Direction { get; private set; }
 
