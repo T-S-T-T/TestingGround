@@ -46,7 +46,6 @@ public class MemberMovement3 : MonoBehaviour
             Vector3 toNeighborDir = toNeighbor.normalized;
 
             // Check if neighbor is in front (within viewAngle)
-            Debug.Log(Vector3.Angle(Direction, toNeighborDir));
             if (Vector3.Angle(Direction, toNeighborDir) < viewAngle * 0.5f)
             {
                 Debug.Log("Entity in view!");
