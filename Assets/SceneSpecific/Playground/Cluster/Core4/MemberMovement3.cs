@@ -26,7 +26,15 @@ public class MemberMovement3 : MonoBehaviour
     void Update()
     {
         // Apply boid rules
+
+        Vector3 tempDir = Direction;
+        
         ApplyBoidRules();
+
+        if (tempDir != Direction)
+        {
+            Debug.Log("Change Direction");
+        }
 
         // Move the boid along its direction
         transform.position += Direction * speed * Time.deltaTime;
@@ -56,7 +64,6 @@ public class MemberMovement3 : MonoBehaviour
             // Check if neighbor is in front (within viewAngle)
             if (Vector3.Angle(Direction, toNeighborDir) < viewAngle * 0.5f)
             {
-                Debug.Log("Neighbor in view!");
                 neighborCount++;
 
                 // Separation: steer away
@@ -66,7 +73,6 @@ public class MemberMovement3 : MonoBehaviour
                 MemberMovement3 other = neighbor.GetComponent<MemberMovement3>();
                 if (other != null)
                 {
-                    Debug.Log("Average heading!");
                     averageHeading += other.Direction;
                 }
 
