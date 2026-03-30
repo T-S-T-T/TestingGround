@@ -9,8 +9,8 @@ public class TreeBodyScript : MonoBehaviour
     private float growInterval = 2f;
 
     [Header("Spawn Settings")]
-    public Transform spawnPoint; // assign your SpawnPoint child here
-    public GameObject Test;      // assign your Test prefab here
+    public Transform spawnPoint;
+    public GameObject Test;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
