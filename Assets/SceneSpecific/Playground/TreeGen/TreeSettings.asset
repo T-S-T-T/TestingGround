@@ -26,6 +26,6 @@ MonoBehaviour:
   generateLeaves: 1
   leavesPerTip: 3
   leafSize: 0.4
-  leafMaterial: {fileID: 0}
-  barkMaterial: {fileID: 0}
+  leafMaterial: {fileID: 2100000, guid: 0ed8543a00d187940b02daac1b3100f3, type: 2}
+  barkMaterial: {fileID: 2100000, guid: 6b34f44ab00a6da41b4e192788ea0429, type: 2}
   radialSegments: 6
