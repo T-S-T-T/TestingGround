@@ -449,6 +449,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 17.884, y: 0, z: 0}
+--- !u!4 &1934925509 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3009689056212227577, guid: 704d3f8ce82d6ad4d9f83f38227ff31f, type: 3}
+  m_PrefabInstance: {fileID: 2155410615710732185}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2155410615710732185
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -461,6 +466,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spider
       objectReference: {fileID: 0}
+    - target: {fileID: 7567744794378544050, guid: 704d3f8ce82d6ad4d9f83f38227ff31f, type: 3}
+      propertyPath: bodyChild
+      value: 
+      objectReference: {fileID: 1934925509}
     - target: {fileID: 8953662065819693987, guid: 704d3f8ce82d6ad4d9f83f38227ff31f, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.028999925
