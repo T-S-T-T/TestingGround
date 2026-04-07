@@ -1,148 +1,218 @@
 using UnityEngine;
 
 /// <summary>
-/// SpiderBodyAdjustment — attach to the Spider root (same object as SpiderController).
-/// Reads all 8 foot positions each frame and adjusts the visual body's
-/// height (ride height), terrain tilt, and idle breathing bob.
+/// SpiderBodyAdjustment (fixed — three bugs addressed)
 ///
-/// MUST run in LateUpdate so all LegStepControllers have already moved.
+/// BUG 1 — Body scraping ground / height jitter:
+///   Old code: set transform.position.y directly every LateUpdate.
+///   Rigidbody physics (gravity, collision) runs in FixedUpdate and also sets Y.
+///   They conflict → jitter and the body sinking into the ground.
+///   Fix: apply an upward spring FORCE via the Rigidbody instead of moving
+///   the transform directly. Physics resolves everything in one place.
+///
+/// BUG 2 — Rotation jitter:
+///   Old code: Quaternion.FromToRotation(up, groundNormal) * transform.rotation
+///   This computes a delta and multiplies it onto the existing rotation every frame.
+///   Any drift accumulates and oscillates.
+///   Fix: compute the ABSOLUTE target rotation directly with Quaternion.LookRotation,
+///   then Slerp toward it. No delta — no drift accumulation.
+///
+/// BUG 3 — Flip on W:
+///   Old code: applied tilt directly to the root transform, which shares rotation
+///   with SpiderController's steering. The two systems fought → flip.
+///   Fix: tilt is applied ONLY to the visual bodyChild transform (local rotation).
+///   The root transform stays upright (Y-rotation only) at all times.
 /// </summary>
 public class SpiderBodyAdjustment : MonoBehaviour
 {
-    // ── Inspector ────────────────────────────────────────────────────────────
+    // ── Inspector ─────────────────────────────────────────────────────────────
 
-    [Header("Leg Data — assign all 8 LegStepControllers")]
-    public LegStepController[] legs;   // order: FL, FR, ML, MR, RL, RR, BL, BR
-                                       // (Front-Left, Front-Right, Mid-Left, etc.)
+    [Header("Leg data — assign all 8 in order: FL FR ML MR RL RR BL BR")]
+    public LegStepController[] legs;
 
-    [Header("Ride Height")]
-    [Tooltip("How high the body centre sits above the average foot level.")]
-    public float rideHeight = 0.55f;
+    [Header("Body child — the visual mesh, NOT the root")]
+    [Tooltip("This is the child GameObject that holds your spider mesh. " +
+             "Tilt is applied here so it never touches the root's rotation.")]
+    public Transform bodyChild;
 
-    [Tooltip("How quickly the body tracks the target height. " +
-             "Lower = more floaty, higher = snappier.")]
-    public float heightSmoothSpeed = 6f;
+    [Header("Height — spring force (replaces direct transform.position.y)")]
+    [Tooltip("Target distance above the average foot height.")]
+    public float rideHeight = 0.7f;
 
-    [Header("Tilt")]
-    [Tooltip("How quickly the body tilts to match terrain slope.")]
+    [Tooltip("Spring stiffness. Higher = snappier. Start around 80.")]
+    public float springStrength = 80f;
+
+    [Tooltip("Spring damping. Higher = less bounce. Usually springStrength * 0.6.")]
+    public float springDamper = 50f;
+
+    [Tooltip("Maximum upward force the spring can apply per frame. " +
+             "Prevents explosive correction if the spider spawns far above ground.")]
+    public float maxSpringForce = 200f;
+
+    [Header("Tilt (applied to bodyChild only)")]
+    [Tooltip("How quickly the visual body tilts to match terrain. " +
+             "Keep below 6 to avoid oscillation.")]
     public float tiltSmoothSpeed = 4f;
 
-    [Header("Idle Breathing")]
-    [Tooltip("Subtle up/down oscillation when nearly stationary.")]
-    public float breatheAmount = 0.018f;
-    public float breatheSpeed  = 1.2f;
+    [Tooltip("Maximum tilt angle in degrees. Clamps extreme slopes.")]
+    public float maxTiltDegrees = 25f;
 
-    [Header("Movement Bob")]
-    [Tooltip("Extra oscillation that kicks in while walking.")]
-    public float walkBobAmount = 0.025f;
-    public float walkBobSpeed  = 9f;
+    [Header("Idle breathe")]
+    public float breatheAmount = 0.015f;
+    public float breatheSpeed = 1.2f;
 
-    // ── Private ──────────────────────────────────────────────────────────────
+    [Header("Walk bob (visual body only)")]
+    public float walkBobAmount = 0.02f;
+    public float walkBobSpeed = 9f;
 
+    // ── Private ───────────────────────────────────────────────────────────────
+
+    private Rigidbody rb;
     private SpiderController spider;
     private float breathTimer;
     private float bobTimer;
 
-    // ── Lifecycle ────────────────────────────────────────────────────────────
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     void Awake()
     {
+        rb = GetComponent<Rigidbody>();
         spider = GetComponent<SpiderController>();
+
+        if (bodyChild == null)
+            Debug.LogWarning("[SpiderBodyAdjustment] bodyChild is not assigned. " +
+                             "Tilt will not work and may cause flipping.", this);
     }
 
+    // Height spring runs in FixedUpdate — same physics tick as Rigidbody.
+    void FixedUpdate()
+    {
+        ApplyHeightSpring();
+    }
+
+    // Tilt and bob run in LateUpdate — after all leg steps have resolved.
     void LateUpdate()
     {
         if (legs == null || legs.Length == 0) return;
-
-        ApplyHeightAndTilt();
+        ApplyTilt();
         ApplyBreatheAndBob();
     }
 
-    // ── Height & Tilt ─────────────────────────────────────────────────────────
+    // ── Height spring ─────────────────────────────────────────────────────────
 
-    void ApplyHeightAndTilt()
+    void ApplyHeightSpring()
     {
-        // ── Average foot height ──
-        float avgY = 0f;
+        if (legs == null || legs.Length == 0) return;
+
+        // Average of all foot Y positions
+        float avgFootY = 0f;
         foreach (var leg in legs)
-            avgY += leg.FootPosition.y;
-        avgY /= legs.Length;
+            avgFootY += leg.FootPosition.y;
+        avgFootY /= legs.Length;
 
-        float targetY = avgY + rideHeight;
+        float targetY = avgFootY + rideHeight;
+        float currentY = transform.position.y;
+        float error = targetY - currentY;          // positive = too low
+        float velY = rb.linearVelocity.y;
 
-        // Smooth the body toward the target height
-        Vector3 pos = transform.position;
-        pos.y = Mathf.Lerp(pos.y, targetY, Time.deltaTime * heightSmoothSpeed);
-        transform.position = pos;
+        // Spring-damper formula: F = k*error - d*velocity
+        float force = (error * springStrength) - (velY * springDamper);
+        force = Mathf.Clamp(force, -maxSpringForce, maxSpringForce);
 
-        // ── Ground normal from leg cross-product ──
-        // We need at least 4 legs for a meaningful normal.
-        // Use the average front pair, rear pair, left side, right side.
-        if (legs.Length >= 8)
-        {
-            // Front pair: legs[0] (FL) and legs[1] (FR)
-            // Rear  pair: legs[6] (BL) and legs[7] (BR)
-            // Left  side: legs[0,2,4,6]
-            // Right side: legs[1,3,5,7]
-
-            Vector3 frontAvg = (legs[0].FootPosition + legs[1].FootPosition) * 0.5f;
-            Vector3 rearAvg  = (legs[6].FootPosition + legs[7].FootPosition) * 0.5f;
-            Vector3 leftAvg  = (legs[0].FootPosition + legs[2].FootPosition
-                              + legs[4].FootPosition + legs[6].FootPosition) * 0.25f;
-            Vector3 rightAvg = (legs[1].FootPosition + legs[3].FootPosition
-                              + legs[5].FootPosition + legs[7].FootPosition) * 0.25f;
-
-            // Two spanning vectors across the foot polygon
-            Vector3 fwdVec   = (frontAvg - rearAvg).normalized;
-            Vector3 rightVec = (rightAvg - leftAvg).normalized;
-
-            // Their cross product is the approximate ground normal
-            Vector3 groundNormal = Vector3.Cross(fwdVec, rightVec).normalized;
-
-            if (groundNormal != Vector3.zero)
-            {
-                // Rotate body so its "up" aligns with the ground normal,
-                // while keeping its "forward" as close to the original as possible.
-                Quaternion targetRot = Quaternion.FromToRotation(transform.up, groundNormal)
-                                       * transform.rotation;
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation, targetRot,
-                    Time.deltaTime * tiltSmoothSpeed);
-            }
-        }
+        rb.AddForce(Vector3.up * force, ForceMode.Force);
     }
 
-    // ── Breathing & Walking Bob ───────────────────────────────────────────────
+    // ── Tilt (bodyChild local rotation only) ──────────────────────────────────
+
+    void ApplyTilt()
+    {
+        if (bodyChild == null || legs.Length < 8) return;
+
+        // Build ground normal from foot positions.
+        // Front pair: [0]=FL, [1]=FR  /  Rear pair: [6]=BL, [7]=BR
+        Vector3 frontMid = (legs[0].FootPosition + legs[1].FootPosition) * 0.5f;
+        Vector3 rearMid = (legs[6].FootPosition + legs[7].FootPosition) * 0.5f;
+        Vector3 leftMid = (legs[0].FootPosition + legs[2].FootPosition
+                          + legs[4].FootPosition + legs[6].FootPosition) * 0.25f;
+        Vector3 rightMid = (legs[1].FootPosition + legs[3].FootPosition
+                          + legs[5].FootPosition + legs[7].FootPosition) * 0.25f;
+
+        Vector3 fwd = (frontMid - rearMid).normalized;
+        Vector3 right = (rightMid - leftMid).normalized;
+
+        // Fallback if degenerate (e.g. all feet at same height)
+        if (fwd == Vector3.zero) fwd = transform.forward;
+        if (right == Vector3.zero) right = transform.right;
+
+        Vector3 groundNormal = Vector3.Cross(fwd, right).normalized;
+        if (groundNormal == Vector3.zero) return;
+
+        // Clamp tilt so the spider can't fold completely on steep terrain
+        float tiltAngle = Vector3.Angle(Vector3.up, groundNormal);
+        if (tiltAngle > maxTiltDegrees)
+            groundNormal = Vector3.Slerp(Vector3.up, groundNormal,
+                                         maxTiltDegrees / tiltAngle);
+
+        // Build an ABSOLUTE target rotation for the body child:
+        // face the root's forward, but tilt "up" toward the ground normal.
+        // Using LookRotation avoids delta-accumulation drift entirely.
+        Quaternion targetRot = Quaternion.LookRotation(
+            Vector3.ProjectOnPlane(transform.forward, groundNormal).normalized,
+            groundNormal);
+
+        // Apply as LOCAL rotation on the body child
+        // (world-space target converted to local because the root may have Y rotation)
+        Quaternion localTarget = Quaternion.Inverse(transform.rotation) * targetRot;
+
+        bodyChild.localRotation = Quaternion.Slerp(
+            bodyChild.localRotation,
+            localTarget,
+            Time.deltaTime * tiltSmoothSpeed);
+    }
+
+    // ── Breathe & walk bob (bodyChild local position) ─────────────────────────
 
     void ApplyBreatheAndBob()
     {
-        float speed = spider != null ? spider.GetSpeed() : 0f;
+        if (bodyChild == null) return;
 
-        // Idle breathe — always running, fades out at speed
+        float speed = spider != null ? spider.Speed : 0f;
+
         breathTimer += Time.deltaTime * breatheSpeed;
-        float breatheOffset = Mathf.Sin(breathTimer)
-                            * breatheAmount
-                            * Mathf.Clamp01(1f - speed * 0.5f);
+        float breathOffset = Mathf.Sin(breathTimer)
+                           * breatheAmount
+                           * Mathf.Clamp01(1f - speed * 0.4f);
 
-        // Walk bob — only when moving
-        if (speed > 0.05f)
-            bobTimer += Time.deltaTime * walkBobSpeed;
-        float walkBobOffset = Mathf.Sin(bobTimer)
-                            * walkBobAmount
-                            * Mathf.Clamp01(speed);
+        if (speed > 0.05f) bobTimer += Time.deltaTime * walkBobSpeed;
+        float bobOffset = Mathf.Sin(bobTimer)
+                        * walkBobAmount
+                        * Mathf.Clamp01(speed);
 
-        transform.position += transform.up * (breatheOffset + walkBobOffset);
+        // Move only the visual child vertically — not the physics root
+        Vector3 localPos = bodyChild.localPosition;
+        localPos.y = breathOffset + bobOffset;   // relative to root, not world
+        bodyChild.localPosition = localPos;
     }
 
 #if UNITY_EDITOR
     void OnDrawGizmos()
     {
         if (legs == null) return;
-        Gizmos.color = Color.cyan;
+        Gizmos.color = UnityEngine.Color.cyan;
         foreach (var leg in legs)
-        {
             if (leg != null)
                 Gizmos.DrawWireSphere(leg.FootPosition, 0.05f);
+
+        // Draw target ride height
+        if (legs.Length > 0)
+        {
+            float avgY = 0f;
+            foreach (var leg in legs) avgY += leg.FootPosition.y;
+            avgY /= legs.Length;
+            Gizmos.color = UnityEngine.Color.yellow;
+            Gizmos.DrawWireCube(
+                new Vector3(transform.position.x, avgY + rideHeight, transform.position.z),
+                new Vector3(0.5f, 0.02f, 0.5f));
         }
     }
 #endif
