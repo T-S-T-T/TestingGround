@@ -4,7 +4,7 @@ using UnityEngine;
 /// Attached to every individual particle that makes up the blob.
 ///
 /// Responsibilities:
-///   • Cohesion  – spring force toward the shared <see cref="BlobController.TargetPosition"/>.
+///   • Cohesion  – spring force toward the shared <see /cref="BlobController.TargetPosition"/>.
 ///   • Surface tension – stronger pull for particles that have drifted far away.
 ///   • Jiggle    – per-particle Perlin-noise force that gives organic wobble.
 ///   • Speed cap – prevents particles from flying off at unrealistic velocities.
